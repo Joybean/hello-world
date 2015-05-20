@@ -1,2 +1,4 @@
-# hello-world
-a hello world repository to learn how to use Github
+===========
+this is the hello world repository.
+
+I am Joybean from China.
