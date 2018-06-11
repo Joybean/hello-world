@@ -11,13 +11,15 @@ def indexMoules(course, folder):
 		iModule += 1
 		maxRatio = -1
 		for subFolder in subFolders:
-			ratio = difflib.SequenceMatcher(None, module['title'], os.path.basename(subFolder)).ratio()
-			if maxRatio < ratio:
-				maxRatio = ratio
-				matchedFolder = subFolder
-		print(matchedFolder)
+			if os.path.isdir(os.path.join(folder, subFolder)):
+				ratio = difflib.SequenceMatcher(None, module['title'], os.path.basename(subFolder)).ratio()
+				print(ratio)
+				if maxRatio < ratio:
+					maxRatio = ratio
+					matchedFolder = subFolder
 		indexClips(module['clips'], os.path.join(folder, matchedFolder))
-		os.rename(os.path.join(folder, matchedFolder), '%s/%d-%s' % (folder, iModule, os.path.basename(matchedFolder)))
+		if os.path.exists(os.path.join(folder, matchedFolder)):
+			os.rename(os.path.join(folder, matchedFolder), '%s/%d-%s' % (folder, iModule, os.path.basename(matchedFolder)))
 
 def indexClips(clips, folder):
 	files = os.listdir(folder)
@@ -26,13 +28,31 @@ def indexClips(clips, folder):
 		iClip += 1
 		maxRatio = -1
 		for file in files:
-			ratio = difflib.SequenceMatcher(None, clip['title'], os.path.basename(file)).ratio()
-			if maxRatio < ratio:
-				maxRatio = ratio
-				matchedFile = file
-		print(matchedFile)
-		os.rename(os.path.join(folder, matchedFile), '%s/%d-%s' % (folder, iClip, os.path.basename(matchedFile)))
+			if os.path.isfile(os.path.join(folder, file)):
+				ratio = difflib.SequenceMatcher(None, clip['title'], os.path.basename(file)).ratio()
+				if maxRatio < ratio:
+					maxRatio = ratio
+					matchedFile = file
+		if os.path.exists(os.path.join(folder, matchedFile)):
+			os.rename(os.path.join(folder, matchedFile), '%s/%d-%s' % (folder, iClip, os.path.basename(matchedFile)))
 
-if __name__ == '__main__':	
-	course = json.loads(open('/Users/i070599/tmp/Java8_lambda/course_content.json').read())
-	indexMoules(course, '/Users/i070599/tmp/Java8_lambda')
+def getCourseContent(response):
+	if 'content' in response and 'text' in response['content']:
+		course = json.loads(response['content']['text']) 
+		if 'data' in course and 'rpc' in course['data'] and 'bootstrapPlayer' in course['data']['rpc'] \
+			and 'course' in course['data']['rpc']['bootstrapPlayer'] and 'modules' in course['data']['rpc']['bootstrapPlayer']['course']:
+			return course['data']['rpc']['bootstrapPlayer']['course']
+
+if __name__ == '__main__':
+	folder = sys.argv[1]
+	files = os.listdir(folder)
+	for file in files:
+		if file.endswith('.har'):
+			har = json.loads(open(os.path.join(folder, file)).read())
+			for entry in har['log']['entries']:
+				if entry['request']['url'] == 'https://app.pluralsight.com/player/api/graphql' \
+					and entry['request']['method'] == 'POST':
+					course = getCourseContent(entry['response'])
+					if course:
+						indexMoules(course, folder)
+						exit()

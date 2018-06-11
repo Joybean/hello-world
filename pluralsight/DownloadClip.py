@@ -13,6 +13,9 @@ from urllib import parse
 #socket.socket = socks.socksocket
 
 def download(url, headers, saveAs):
+	if os.path.exists(saveAs):
+		return
+
 	print("download from: " + url)
 	required = ['if-range', 'accept', 'accept-encoding', 'accept-language', 'cookie', 'range', 'referer', 'user-agent' ]
 	headerDict = {}
@@ -21,7 +24,6 @@ def download(url, headers, saveAs):
 			headerDict[header['name']] = header['value']
 	req = requests.get(url, headers=headerDict, stream=True)
 	
-	saveAs = saveAs.replace('/', ' ')
 	folder = os.path.dirname(saveAs)
 	if not os.path.exists(folder):
 		os.makedirs(folder)
@@ -42,25 +44,38 @@ def getModuleAndTitle(entry):
 	if 'queryString' in entry['request']:
 		for queryString in entry['request']['queryString']:
 			if queryString['name'] == 'moduleTitle' or queryString['name'] == 's:meta:moduleTitle':
-				moduleTitle = parse.unquote(queryString['value'])
+				moduleTitle = parse.unquote(queryString['value']).replace(':', '').replace('/', '').replace(' ', '')
 			if queryString['name'] == 'title' or queryString['name'] == 's:meta:title':
-				title = parse.unquote(queryString['value'])
+				title = parse.unquote(queryString['value']).replace(':', '').replace('/', '').replace(' ', '')
 	return moduleTitle, title
 
-def scanHarAndDownload(fileName):
-	folder = os.path.dirname(fileName)
-	with open(fileName) as urls:
-		har = json.loads(open(fileName).read())
+def scanHarAndDownload(harFile):
+	folder = os.path.dirname(harFile)
+	saveAsList = []
+	urlList = []
+	headersList = []
+	with open(harFile) as urls:
+		har = json.loads(open(harFile).read())
 		saveAs = folder
-		for entry in har['log']['entries']:			
+		for entry in har['log']['entries']:		
 			mT, t = getModuleAndTitle(entry)
-			if mT != '' and t != '':
-				saveAs = '%s/%s/%s.mp4' % (folder, mT, t)
-			if os.path.exists(saveAs) and os.stat(saveAs).st_size == 0:
-				os.remove(saveAs)
-			if  not os.path.exists(saveAs) \
-				and re.search('(1280x720.mp4|1024x768.mp4)', entry['request']['url']) != None :
-				download(entry['request']['url'], entry['request']['headers'], saveAs)
+			saveAs = '%s/%s/%s.mp4' % (folder, mT, t)
+			if mT != '' and t != '' and saveAsList.count(saveAs) == 0:
+				saveAsList.append(saveAs)
+
+			if re.search('(1280x720.mp4|1024x768.mp4)', entry['request']['url']) != None \
+				and urlList.count(entry['request']['url']) == 0:
+				urlList.append(entry['request']['url'])
+				headersList.append(entry['request']['headers'])
+
+	if len(saveAsList) == len(urlList) == len(headersList):
+		count = len(saveAsList)
+	else:
+		print('len(saveAsList): %d; len(urlList): %d; len(headersList): %d' % (len(saveAsList), len(urlList), len(headersList)))
+		return
+	print('%d clips are found.')
+	for i in range(count):
+		download(urlList[i], headersList[i], saveAsList[i])
 
 if __name__ == '__main__':
 	scanHarAndDownload(sys.argv[1])
