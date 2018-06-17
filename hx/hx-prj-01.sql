@@ -1,11 +1,9 @@
 use hx;
 SET SESSION sql_mode = '';
 
-LOAD DATA INFILE '/Users/i070599/Documents/Balance.csv' INTO TABLE Balance FIELDS TERMINATED BY ',';
+LOAD DATA LOCAL INFILE '/Users/i070599/Documents/Balance.csv' INTO TABLE Balance FIELDS TERMINATED BY ',';
 
-LOAD DATA INFILE '/Users/i070599/Documents/Withdraw.csv' INTO TABLE Withdraw FIELDS TERMINATED BY ',';
-
-
+LOAD DATA LOCAL INFILE '/Users/i070599/Documents/Withdraw.csv' INTO TABLE Withdraw FIELDS TERMINATED BY ',';
 
 select *
 from Balance 
