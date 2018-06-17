@@ -44,9 +44,9 @@ def getModuleAndTitle(entry):
 	if 'queryString' in entry['request']:
 		for queryString in entry['request']['queryString']:
 			if queryString['name'] == 'moduleTitle' or queryString['name'] == 's:meta:moduleTitle':
-				moduleTitle = parse.unquote(re.sub('[,:/ ]', '-', queryString['value']))
+				moduleTitle = re.sub('[,:/ ]', '-', parse.unquote(queryString['value'])).replace('--', '-')
 			if queryString['name'] == 'title' or queryString['name'] == 's:meta:title':
-				title = parse.unquote(re.sub('[,:/ ]', '-', queryString['value']))
+				title = re.sub('[,:/ ]', '-', parse.unquote(queryString['value'])).replace('--', '-')
 	return moduleTitle, title
 
 def scanHarAndDownload(harFile):
@@ -63,7 +63,7 @@ def scanHarAndDownload(harFile):
 			if mT != '' and t != '' and saveAsList.count(saveAs) == 0:
 				saveAsList.append(saveAs)
 
-			if re.search('(1280x720.mp4|1024x768.mp4)\?', entry['request']['url']) != None \
+			if re.search('(1280x720.mp4|1024x768.mp4)', entry['request']['url']) != None \
 				and urlList.count(entry['request']['url']) == 0:
 				urlList.append(entry['request']['url'])
 				headersList.append(entry['request']['headers'])

@@ -48,6 +48,7 @@ if __name__ == '__main__':
 	files = os.listdir(folder)
 	for file in files:
 		if file.endswith('.har'):
+			print("scan file: " + os.path.join(folder, file))
 			har = json.loads(open(os.path.join(folder, file)).read())
 			for entry in har['log']['entries']:
 				if entry['request']['url'] == 'https://app.pluralsight.com/player/api/graphql' \
