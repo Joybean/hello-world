@@ -5,6 +5,36 @@ LOAD DATA LOCAL INFILE '/Users/i070599/Documents/Balance.csv' INTO TABLE Balance
 
 LOAD DATA LOCAL INFILE '/Users/i070599/Documents/Withdraw.csv' INTO TABLE Withdraw FIELDS TERMINATED BY ',';
 
+
+select * from Balance;
+
+select count(1) from Balance;
+
+select sum(Balance) from Balance;
+
+select max(Balance) from Balance;
+
+select count(1)
+from Balance
+where length(IDCard) < 15;
+
+select count(1)
+from Balance
+where IDCard = '';
+
+select *
+from Balance T1, Balance T2
+where T1.IDCard = T2.IDCard and T1.UserID <> T2.UserID 
+and length(T1.IDCard) >= 15;
+
+select count(1) from (
+select IDCard, count(1)
+from Balance
+group by IDCard
+having count(1) > 1 and length(IDCard) >= 15) as T2;
+
+
+
 select *
 from Balance 
 where UserID not in(
