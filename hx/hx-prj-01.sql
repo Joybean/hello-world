@@ -1,9 +1,70 @@
 use hx;
 SET SESSION sql_mode = '';
 
+DELETE FROM UserPay_1;
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/Test1.csv' INTO TABLE UserPay_1 FIELDS TERMINATED BY ',';
+select * from UserPay_1;
+
+
+DELETE FROM UserPay_2;
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/Test2.csv' INTO TABLE UserPay_2 FIELDS TERMINATED BY ',';
+
+
+DELETE FROM UserPay_3;
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/Test3.csv' INTO TABLE UserPay_3 FIELDS TERMINATED BY ',';
+
+delete from User_Hongbao;
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/User_Hongbao.csv' INTO TABLE User_Hongbao FIELDS TERMINATED BY ',';
+
+
+select T1.UserId as UserId, Prepay as Prepay, Buy as Buy, Withdraw as Withdraw,
+	T2.Pay as Pay, T2.`Order` as `Order`, T2.Hongbao as Hongbao 
+
+INTO OUTFILE '/Users/i070599/github/hello-world/hx/merged0.csv'
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+
+from UserPay T1 left outer join User_Hongbao T2 on T1.UserId = T2.UserId;
+
+
+select sum(T2.pay), sum(T2.`order`), sum(T2.Hongbao)
+from UserPay T1 left outer join User_Hongbao T2 on T1.UserId = T2.UserId;
+
+select *
+from User_Hongbao T1 where T1.UserId not in (select UserId from UserPay);
+
+select * from User_Hongbao;
+
+select sum(Pay), sum(`Order`), sum(Hongbao) from User_Hongbao;
+
+select sum(Prepay), sum(Buy), sum(Withdraw) from UserPay;
+
+select sum(Prepay), sum(Buy), sum(Withdraw) from UserPay_1;
+
+select sum(Prepay), sum(Buy), sum(Withdraw) from UserPay_2;
+
+select sum(Prepay), sum(Buy), sum(Withdraw) from UserPay_3;
+
+
 LOAD DATA LOCAL INFILE '/Users/i070599/Documents/Balance.csv' INTO TABLE Balance FIELDS TERMINATED BY ',';
 
 LOAD DATA LOCAL INFILE '/Users/i070599/Documents/Withdraw.csv' INTO TABLE Withdraw FIELDS TERMINATED BY ',';
+
+Delete from UserPay;
+
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/Test1.csv' INTO TABLE UserPay FIELDS TERMINATED BY ',';
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/Test2.csv' INTO TABLE UserPay FIELDS TERMINATED BY ',';
+LOAD DATA LOCAL INFILE '/Users/i070599/github/hello-world/hx/Test3.csv' INTO TABLE UserPay FIELDS TERMINATED BY ',';
+
+CREATE TABLE `hx`.`UserPay` (
+  `UserId` INT NOT NULL,
+  `Prepay` DECIMAL(15,2) NULL,
+  `Buy` DECIMAL(15,2) NULL,
+  `Withdraw` DECIMAL(15,2) NULL,
+  PRIMARY KEY (`UserId`));
+
+
+
 
 
 select * from Balance;
